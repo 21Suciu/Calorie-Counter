@@ -44,10 +44,32 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        .daily-log-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .daily-log-button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <h1>Search Food</h1>
+
+    <!-- Button to view today's log -->
+    <a href="{% url 'daily_log' %}">
+        <button class="daily-log-button">
+            View Today's Log
+        </button>
+    </a>
 
     <!-- Search form -->
     <form method="post">

@@ -3,6 +3,9 @@ import requests
 from .models import FoodLog
 from django.conf import settings
 from datetime import date
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.decorators import login_required
 
 
 def search_food(request):
@@ -49,6 +52,7 @@ def search_food(request):
     })
 
 
+@login_required
 def add_to_log(request):
     if request.method == 'POST':
         food_name = request.POST.get('food_name')
@@ -68,6 +72,7 @@ def add_to_log(request):
             calories = (calories_per_100g / 100) * grams
 
             FoodLog.objects.create(
+                user=request.user,
                 food_name=food_name,
                 calories=calories,
                 portion_size=f"{grams}g"
@@ -81,9 +86,10 @@ def add_to_log(request):
     return redirect('search_food')
 
 
+@login_required
 def daily_log(request):
     # Get all food logs for today (filtered by date portion of the timestamp)
-    food_logs = FoodLog.objects.filter(date=date.today())
+    food_logs = FoodLog.objects.filter(user=request.user, date=date.today())
 
     # Calculate total calories
     total_calories = sum(log.calories for log in food_logs)
@@ -92,3 +98,32 @@ def daily_log(request):
         'food_logs': food_logs,
         'total_calories': total_calories,
     })
+
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('daily_log')
+    else:
+        form = UserCreationForm()
+    return render(request, 'calorie_app/signup.html', {'form': form})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('/')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'calorie_app/login.html', {'form': form})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')

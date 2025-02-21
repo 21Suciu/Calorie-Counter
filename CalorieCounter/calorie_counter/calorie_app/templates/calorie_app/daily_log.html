@@ -37,7 +37,15 @@
     </style>
 </head>
 <body>
-    <h1>Calorie Tracker</h1>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Calorie Tracker</h1>
+        <a href="{% url 'logout' %}">
+            <button style="padding: 10px 15px; font-size: 16px; background-color: #f44336; color: white; border: none; cursor: pointer; border-radius: 5px;">
+                Logout
+            </button>
+        </a>
+    </div>
 
     <h2>Today's Food Log</h2>
 
