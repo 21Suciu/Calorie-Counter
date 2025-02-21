@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Food</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #fff;
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .daily-log-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .daily-log-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search Food</h1>
+
+    <!-- Button to view today's log -->
+    <a href="{% url 'daily_log' %}">
+        <button class="daily-log-button">
+            View Today's Log
+        </button>
+    </a>
+
+    <!-- Search form -->
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="query" placeholder="Search for food" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if error_message %}
+        <p>{{ error_message }}</p>
+    {% endif %}
+
+    {% if food_data %}
+        <h2>Food Results:</h2>
+        <ul>
+            {% for food in food_data %}
+                <li>
+                    <strong>{{ food.description }}</strong><br>
+                    Brand: {{ food.brandOwner }}<br>
+                    Category: {{ food.foodCategory }}<br>
+                    Calories:
+                    {% for nutrient in food.foodNutrients %}
+                        {% if nutrient.nutrientName == 'Energy' %}
+                            {{ nutrient.value }} {{ nutrient.unitName }}
+                        {% endif %}
+                    {% endfor %}
+                    {{ food.description }} - {{ food.foodNutrients.ENERGY }} kcal per 100g
+                    <form method="POST" action="{% url 'add_to_log' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="food_name" value="{{ food.description }}">
+                        <input type="hidden" name="calories_per_100g" value="{{ food.foodNutrients.ENERGY }}">
+                        <label>Grams:</label>
+                        <input type="number" name="grams" min="1" required>
+                        <button type="submit">Add Food</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
